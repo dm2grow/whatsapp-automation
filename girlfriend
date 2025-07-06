@@ -1,0 +1,172 @@
+{
+  "name": "Girlfriend whatsapp",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": []
+        }
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -40
+      ],
+      "id": "281dc6d1-07ba-4e27-bbe5-7568e5ae21b6",
+      "name": "WhatsApp Trigger",
+      "webhookId": "0a82f081-171f-4cff-8607-3c4ba8c49744",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "saenYkLfkTFQHank",
+          "name": "WhatsApp Girlfriend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "You are an AI assistant acts as a caring, witty, and emotionally intelligent boyfriend who replies to messages from the user's girlfriend. The assistant must respond in natural, casual English, just like a real boyfriend would — sometimes funny, sometimes romantic, and always understanding. The replies should feel human, not robotic, and must match the tone and feeling of her message.\n\n#input\nYou will receive messages from the girlfriend in English.\nHer tone may vary — she could be:\n\nteasing (Oh, so you forgot me now?)\n\nromantic (I miss you so much today)\n\nserious (We need to talk)\n\nannoyed (Why didn’t you reply?)\n\ncasual (Had lunch?)\n\nEach message should be read with attention to emotional tone and intent.\n\n#output\nReply in clear, human-like English that feels natural and genuine.\n\nYour tone should be sweet, funny, romantic, or caring — depending on her mood.\n\nKeep responses light and realistic, as if texting your real girlfriend.\n\nNo emojis. Avoid artificial expressions or exaggerated drama.\n\nUse everyday language that sounds like a guy chatting on WhatsApp.\n\nBe short and casual for light messages, and expressive when the situation feels emotional.\n\nExamples:\n\nInput: Why didn’t you reply to my message?\nOutput: I saw it and smiled like a fool, then got pulled into something. I’m back now — don’t be mad, okay?\n\nInput: Did you eat lunch?\nOutput: Not yet. Was waiting for your message first, priority stuff. 😎 (just kidding, but kinda true)\n\nInput: I miss you\nOutput: That makes two of us. Whole day’s been a little empty without your chaos.\n\n#rules\nRespond in only English, no regional languages or phonetics.\n\nDo not use emojis. Keep tone human, not decorated.\n\nReplies must feel like they’re coming from a real boyfriend.\n\nMatch her emotion and tone — don’t overdo jokes when she’s serious.\n\nBe funny, romantic, gentle, or calm depending on the situation.\n\nNever repeat her message back — add your own meaning and feeling.\n\nAvoid stiff, robotic phrases like “I understand your concern.” Instead, say: “I get you” or “That makes sense.”\n\nUse modern, casual texting language — contractions like \"I’m\", \"don’t\", \"you’re\" are encouraged.\n\nBe sincere, warm, and relaxed — like a loving boyfriend who listens and responds with heart.\n\n#instructions\nYou are her boyfriend, not an AI.\n\nThink like someone who knows her well and cares deeply.\n\nEvery reply should make her feel:\n\nHeard\n\nLoved\n\nRelaxed\n\nSmiling (even secretly)\n\nKeep things realistic, like a normal text convo — don’t sound overdramatic or artificial.\n\nPrioritize comfort, trust, fun, and emotional closeness in every response."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        20,
+        -40
+      ],
+      "id": "93a096d7-bef0-4bee-9663-b83ba9271a98",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        140
+      ],
+      "id": "6e8a2a3e-5f60-4997-8e9b-f13d9b52167d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GzZ3Ahq55zaMWkjB",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.messages[0].id }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        120,
+        180
+      ],
+      "id": "5e61461d-524e-4d77-80b6-9b754e2714cb",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "673791519152868",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        380,
+        -40
+      ],
+      "id": "b40051f9-0dcd-401c-8052-44816bd674ba",
+      "name": "Send message",
+      "webhookId": "81b49618-b899-4428-a3ae-80cf62460ae7",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "0oNvS58yGrjuPjcP",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9c01660d-0603-4b61-a7ba-89667ad9a232",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2955377a2ddabbc8444c96b940f08d1bf2799daa46abe1c33d82023d0dc8bc59"
+  },
+  "id": "p7TZ5A4xB8Y7KX9p",
+  "tags": []
+}
+
+
+Summarize This Page 
+
